@@ -5,7 +5,7 @@ import torchvision.transforms as transforms
 from PIL import Image
 import os
 
-# 定義 SimpleCNN 類別（與 `train.py` 一致）
+# ✅ 確保 `SimpleCNN` 定義在這裡
 class SimpleCNN(nn.Module):
     def __init__(self):
         super(SimpleCNN, self).__init__()
@@ -24,18 +24,14 @@ class SimpleCNN(nn.Module):
         x = self.fc2(x)
         return F.log_softmax(x, dim=1)
 
-# 初始化模型
-model = SimpleCNN()
-
-# 確保模型文件存在
+# ✅ **加載模型**
 model_path = "models/mnist_cnn.pth"
 if not os.path.exists(model_path):
     raise FileNotFoundError(f"❌ 找不到模型權重文件: {model_path}，請先執行 train.py 訓練模型。")
 
-# 載入訓練好的權重
-model.load_state_dict(torch.load("models/mnist_cnn.pth", map_location=torch.device("cpu")))
+model = SimpleCNN()
+model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
 model.eval()
-
 print("✅ 成功加載模型")
 
 # 圖片轉換函數
@@ -48,8 +44,7 @@ transform = transforms.Compose([
 
 def classify_image(image):
     """
-    對上傳的圖像進行分類，返回預測的數字標籤。
-    `image` 可以是 PIL.Image 物件，而不僅僅是文件路徑。
+    ✅ `classify_image()` 現在只需要 **圖片作為參數**
     """
     if isinstance(image, str):  # 如果是路徑，先讀取圖片
         image = Image.open(image).convert("L")  

@@ -4,23 +4,40 @@ import cv2
 import numpy as np
 from PIL import Image
 
-def defend_adversarial(image_path: str):
+
+
+import cv2
+import numpy as np
+from PIL import Image
+
+def defend_adversarial(image_path: str, method: str = "auto"):
     """
     這個函數應用防禦技術來降低對抗樣本的影響：
-    - Gaussian Blur（高斯模糊）: 平滑化圖像，減少對抗噪音
-    - Bilateral Filter（雙邊濾波）: 保持圖片輪廓，同時消除噪音
+    - Gaussian Blur（高斯模糊）
+    - Bilateral Filter（雙邊濾波）
+    - Median Filter（中值濾波）
     """
     # 1. 讀取圖片
-    image = Image.open(image_path).convert("L")  # 轉換為灰階
-    image_np = np.array(image)
+    image = Image.open(image_path).convert("L")  # 確保是灰階
+    image_np = np.array(image)  # 轉成 NumPy 陣列
 
-    # 2. 應用防禦技術
-    image_blurred = cv2.GaussianBlur(image_np, (3, 3), 1)  # 高斯模糊
-    image_defended = cv2.bilateralFilter(image_blurred, 5, 75, 75)  # 雙邊濾波
+    # 2. 選擇防禦方法
+    if method == "gaussian":
+        image_np = cv2.GaussianBlur(image_np, (3, 3), 1)
+    elif method == "bilateral":
+        image_np = cv2.bilateralFilter(image_np, 5, 75, 75)
+    elif method == "median":
+        image_np = cv2.medianBlur(image_np, 3)
+    elif method == "auto":  # ✅ 自動模式：同時套用多種方法
+        image_np = cv2.GaussianBlur(image_np, (3, 3), 1)
+        image_np = cv2.bilateralFilter(image_np, 5, 75, 75)
+        image_np = cv2.medianBlur(image_np, 3)
 
-    # 3. 儲存處理後的圖片
+    # 3. 確保數據範圍正確
+    image_np = np.clip(image_np, 0, 255).astype(np.uint8)
+
+    # 4. 儲存處理後的圖片
     output_path = "static/defended_image.png"
-    defended_pil = Image.fromarray(image_defended)
-    defended_pil.save(output_path)
+    Image.fromarray(image_np).save(output_path)  # 確保正確儲存
 
     return output_path

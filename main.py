@@ -1,4 +1,4 @@
-from fastapi import FastAPI, File, UploadFile, Query
+from fastapi import FastAPI, File, UploadFile, Form, Query  # 這行是缺少的部分
 from models.defense import defend_adversarial  
 import shutil
 import os
@@ -11,13 +11,34 @@ from PIL import Image
 from fastapi.responses import JSONResponse
 from models.classify import classify_image
 import io  # 這行是缺少的部分
-
-
+import urllib.request
+import torch
+from models.classify import classify_image, SimpleCNN  # ✅ 確保載入 SimpleCNN
 
 app = FastAPI()
 
 UPLOAD_DIR = "static/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
+
+# Google Drive 下載連結
+MODEL_URL = "https://drive.google.com/uc?id=13D1bcxVFpuMY62UrjXPBuULnfJglQIIm&export=download"
+MODEL_PATH = "models/mnist_cnn.pth"
+
+def download_model():
+    """ 檢查 `mnist_cnn.pth` 是否存在，不存在則從 Google Drive 下載 """
+    if not os.path.exists(MODEL_PATH):
+        print("🚀 下載模型中...")
+        urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+        print("✅ 模型下載完成！")
+
+# 伺服器啟動時下載模型
+download_model()
+
+# ✅ 先初始化 `SimpleCNN`
+model = SimpleCNN()  # **初始化模型**
+model.load_state_dict(torch.load(MODEL_PATH, map_location=torch.device("cpu")))  # **載入權重**
+model.eval()  # **設定為評估模式**
+print("✅ 成功加載模型！")
 
 @app.get("/")
 def home():
@@ -62,19 +83,15 @@ def generate_adversarial_example(epsilon: float = Query(0.2, ge=0.0, le=1.0)):  
     return FileResponse(image_path, media_type="image/png", filename="adversarial_example.png")
 
 @app.post("/defend/")
-async def defend_image(file: UploadFile = File(...)):
+async def defend_image(file: UploadFile = File(...), defense_method: str = Form("auto")):
     file_path = os.path.join(UPLOAD_DIR, file.filename)
     with open(file_path, "wb") as buffer:
         shutil.copyfileobj(file.file, buffer)
 
-    # 進行對抗樣本防禦
-    processed_image_path = defend_adversarial(file_path)
+    processed_image_path = defend_adversarial(file_path, defense_method)
 
-    # **確保 API 返回圖片**
-    if os.path.exists(processed_image_path):
-        return FileResponse(processed_image_path, media_type="image/png", filename="defended_image.png")
-    else:
-        return {"error": "Failed to process image"}
+    # ✅ 確保返回正確的圖片文件
+    return FileResponse(processed_image_path, media_type="image/png")
     
 # 確保你的模型正確加載
 from models.classify import classify_image  # 確保這個函數已經正確導入
@@ -82,9 +99,9 @@ from models.classify import classify_image  # 確保這個函數已經正確導�
 @app.post("/classify/")
 async def classify_uploaded_image(file: UploadFile = File(...)):
     image_bytes = await file.read()
-    try:
-        image = Image.open(io.BytesIO(image_bytes)).convert("L")  # 確保轉換為 PIL.Image
-        predicted_label = classify_image(image)
-        return {"predicted_label": predicted_label}
-    except Exception as e:
-        return {"error": str(e)}
+    image = Image.open(io.BytesIO(image_bytes)).convert("L")
+
+    # ✅ **只傳 `image`，不要傳 `model`！**
+    predicted_label = classify_image(image)
+
+    return {"predicted_label": predicted_label}
