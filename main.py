@@ -24,12 +24,18 @@ os.makedirs(UPLOAD_DIR, exist_ok=True)
 MODEL_URL = "https://drive.google.com/uc?id=13D1bcxVFpuMY62UrjXPBuULnfJglQIIm&export=download"
 MODEL_PATH = "models/mnist_cnn.pth"
 
+import urllib.request
+
 def download_model():
     """ 檢查 `mnist_cnn.pth` 是否存在，不存在則從 Google Drive 下載 """
     if not os.path.exists(MODEL_PATH):
         print("🚀 下載模型中...")
-        urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
-        print("✅ 模型下載完成！")
+
+        try:
+            urllib.request.urlretrieve(MODEL_URL, MODEL_PATH)
+            print(f"✅ 模型下載成功！存放於: {MODEL_PATH}")
+        except Exception as e:
+            print(f"❌ 模型下載失敗！錯誤: {e}")
 
 # 伺服器啟動時下載模型
 download_model()
