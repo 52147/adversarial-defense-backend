@@ -3,9 +3,13 @@ import torch.nn as nn
 import torch.nn.functional as F
 import torchvision.transforms as transforms
 from PIL import Image
-import os
+import io
+import urllib.request
 
-# ✅ 確保 `SimpleCNN` 定義在這裡
+# ✅ Google Drive 下載 URL
+MODEL_URL = "https://drive.google.com/uc?id=13D1bcxVFpuMY62UrjXPBuULnfJglQIIm&export=download"
+
+# ✅ 定義 SimpleCNN
 class SimpleCNN(nn.Module):
     def __init__(self):
         super(SimpleCNN, self).__init__()
@@ -24,17 +28,25 @@ class SimpleCNN(nn.Module):
         x = self.fc2(x)
         return F.log_softmax(x, dim=1)
 
-# ✅ **加載模型**
-model_path = "models/mnist_cnn.pth"
-if not os.path.exists(model_path):
-    raise FileNotFoundError(f"❌ 找不到模型權重文件: {model_path}，請先執行 train.py 訓練模型。")
+# ✅ 直接從 Google Drive 加載模型
+def load_model_from_drive():
+    print("🚀 直接從 Google Drive 加載模型...")
+    try:
+        response = urllib.request.urlopen(MODEL_URL)  # 讀取 `.pth` 文件
+        model_data = io.BytesIO(response.read())  # 轉為記憶體流
+        model = SimpleCNN()
+        model.load_state_dict(torch.load(model_data, map_location=torch.device("cpu")))
+        model.eval()
+        print("✅ 成功直接從 Google Drive 加載模型！")
+        return model
+    except Exception as e:
+        print(f"❌ 無法從 Google Drive 加載模型！錯誤: {e}")
+        raise e  # 讓程序終止
 
-model = SimpleCNN()
-model.load_state_dict(torch.load(model_path, map_location=torch.device("cpu")))
-model.eval()
-print("✅ 成功加載模型")
+# ✅ 加載模型
+model = load_model_from_drive()
 
-# 圖片轉換函數
+# ✅ 圖片轉換函數
 transform = transforms.Compose([
     transforms.Grayscale(num_output_channels=1),
     transforms.Resize((28, 28)),  # MNIST 圖像大小
