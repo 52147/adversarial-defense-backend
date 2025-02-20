@@ -14,9 +14,17 @@ import io  # 這行是缺少的部分
 import urllib.request
 import torch
 from models.classify import classify_image, SimpleCNN  # ✅ 確保載入 SimpleCNN
+from fastapi.middleware.cors import CORSMiddleware
 
 app = FastAPI()
-
+# 允許來自任何地方的請求（開發時可用，正式環境應限制來源）
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # 允許所有來源
+    allow_credentials=True,
+    allow_methods=["*"],  # 允許所有 HTTP 方法 (GET, POST, OPTIONS, etc.)
+    allow_headers=["*"],  # 允許所有標頭
+)
 UPLOAD_DIR = "static/uploads"
 os.makedirs(UPLOAD_DIR, exist_ok=True)
 
