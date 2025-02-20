@@ -1,5 +1,68 @@
 
-📌 Backend - FastAPI（繁體中文）
+
+# 🛡️ Adversarial Defense Backend
+
+This backend, built with **FastAPI**, provides an **Adversarial Defense API** that supports:
+- 🔹 **Adversarial Example Generation**
+- 🔹 **Defensive Mechanisms**
+- 🔹 **Image Classification (MNIST)**
+- 🔹 **Multiple Defense Methods** (Gaussian Blur, Bilateral Filter, Median Filter)
+
+---
+
+## 📦 **Project Structure**
+
+adversarial-defense-backend/
+│── models/                  # Model-related files
+│   ├── classify.py          # CNN classifier
+│   ├── defense.py           # Defense mechanisms
+│   ├── train.py             # Train the MNIST model
+│── static/                  # Stores uploaded and processed images
+│── main.py                  # FastAPI entry point
+│── requirements.txt         # Dependencies
+│── README.md                # Project documentation
+
+---
+
+## 🚀 **Getting Started**
+### **1️⃣ Install dependencies**
+```bash
+git clone https://github.com/52147/adversarial-defense-backend.git
+cd adversarial-defense-backend
+pip install -r requirements.txt
+
+2️⃣ Start the Backend Server
+
+uvicorn main:app --host 0.0.0.0 --port 8000
+
+The API will be available at http://127.0.0.1:8000.
+
+Visit http://127.0.0.1:8000/docs for Swagger API documentation.
+
+📌 API Endpoints
+
+Method	Endpoint	Description
+GET	/	API Health Check
+POST	/upload/	Upload and process an image
+GET	/generate_adversarial_example?epsilon=0.3	Generate adversarial example
+POST	/defend/	Apply defense mechanisms
+POST	/classify/	Classify an image
+
+📡 Deployment
+
+This backend is deployed on Render:
+🔗 Backend API: https://adversarial-defense-backend.onrender.com/
+
+To deploy manually:
+
+pip install gunicorn
+gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
+
+📜 License
+
+MIT License - Free to use and modify.
+
+
 
 # 🛡️ Adversarial Defense Backend
 
@@ -64,68 +127,3 @@ gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
 MIT License - 本專案可自由使用與修改。
 
 ---
-
-## **📌 Backend - FastAPI（English）**
-```markdown
-# 🛡️ Adversarial Defense Backend
-
-This backend, built with **FastAPI**, provides an **Adversarial Defense API** that supports:
-- 🔹 **Adversarial Example Generation**
-- 🔹 **Defensive Mechanisms**
-- 🔹 **Image Classification (MNIST)**
-- 🔹 **Multiple Defense Methods** (Gaussian Blur, Bilateral Filter, Median Filter)
-
----
-
-## 📦 **Project Structure**
-
-adversarial-defense-backend/
-│── models/                  # Model-related files
-│   ├── classify.py          # CNN classifier
-│   ├── defense.py           # Defense mechanisms
-│   ├── train.py             # Train the MNIST model
-│── static/                  # Stores uploaded and processed images
-│── main.py                  # FastAPI entry point
-│── requirements.txt         # Dependencies
-│── README.md                # Project documentation
-
----
-
-## 🚀 **Getting Started**
-### **1️⃣ Install dependencies**
-```bash
-git clone https://github.com/52147/adversarial-defense-backend.git
-cd adversarial-defense-backend
-pip install -r requirements.txt
-
-2️⃣ Start the Backend Server
-
-uvicorn main:app --host 0.0.0.0 --port 8000
-
-The API will be available at http://127.0.0.1:8000.
-
-Visit http://127.0.0.1:8000/docs for Swagger API documentation.
-
-📌 API Endpoints
-
-Method	Endpoint	Description
-GET	/	API Health Check
-POST	/upload/	Upload and process an image
-GET	/generate_adversarial_example?epsilon=0.3	Generate adversarial example
-POST	/defend/	Apply defense mechanisms
-POST	/classify/	Classify an image
-
-📡 Deployment
-
-This backend is deployed on Render:
-🔗 Backend API: https://adversarial-defense-backend.onrender.com/
-
-To deploy manually:
-
-pip install gunicorn
-gunicorn -w 4 -k uvicorn.workers.UvicornWorker main:app
-
-📜 License
-
-MIT License - Free to use and modify.
-
